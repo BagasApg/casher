@@ -1,0 +1,28 @@
+.ep-primary {
+    background-color: rgb(125, 125, 255) !important;
+}
+
+.ep-nav-link {
+    color: rgb(246, 246, 246) !important;
+}
+
+.ep-nav-link:hover {
+    color:  white !important;
+}
+
+.ep-nav-link:focus {
+    color:  white !important;
+}
+
+.ep-nav-link:active {
+    color:  white !important;
+}
+
+.ep-active {
+    color:  white !important;
+}
+
+.ep-form-control:focus {
+    border-color: rgb(125, 125, 255);
+    box-shadow: none;
+}
