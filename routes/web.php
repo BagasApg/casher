@@ -7,6 +7,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionDetailController;
+use App\Models\Transaction;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,11 +31,10 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::middleware('auth')->group(function(){
     Route::resource('/category', CategoryController::class);
     Route::resource('/item', ItemController::class);
-    Route::get('/transaction/check', [TransactionController::class, 'check'])->name('transaction.check');
     Route::get('/transaction/flush', [TransactionController::class, 'flush'])->name('transaction.flush');
     Route::resource('/transaction', TransactionController::class);
-    Route::get('/transaction/add-item/{id}', [TransactionController::class, 'addItem'])->name('transaction.add-item');
-    Route::get('/transaction/remove-item/{id}', [TransactionController::class, 'removeItem'])->name('transaction.remove-item');
-    
+    Route::get('/transaction/add/{id}', [TransactionController::class, 'add'])->name('transaction.add');
+    Route::post('/transaction/update', [TransactionController::class, 'cartUpdate'])->name('cart.update');
+    Route::get('/transaction/delete/{id}', [TransactionController::class, 'destroy'])->name('cart.delete');
 });
 // Route::resource('/details', TransactionDetailController::class);

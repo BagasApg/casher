@@ -15,22 +15,36 @@ class TransactionController extends Controller
     public function index(Request $request)
     {
         $items = Item::all();
-        $cart = session('cart');
+        return view('transaction', compact('items'));
+    }
 
-        $ids = [];
-        if(!is_null($cart)){
+    public function add($id){
+        $item = Item::findorfail($id);
+        $cart = session()->get('cart');
+        $cart_subtotal = session()->get('cart_subtotal');
 
-            foreach($cart as $cart_item){
-                array_push($ids, $cart_item->id);
-            }
+        if(isset($cart[$id])){
+            $cart[$id]['qty'] += 1;
+            $cart[$id]['subtotal'] = $item->price * $cart[$id]['qty'];
+        } else {
+            $cart[$id] = [
+                'id' => $item->id,
+                'name' => $item->name,
+                'qty' => 1,
+                'subtotal' => $item->price,
+            ];
         }
-        
-        
-        if(is_null($cart)){
-            $cart = [];
-        }
-        // dd($items);
-        return view('transaction', compact('items', 'cart', 'ids'));
+        // if(isset($cart['total'])){
+            $cart_subtotal += $item->price;
+
+        // } else {
+            // $cart_subtotal = $cart[$id]['subtotal'];
+        // }
+
+        session()->put('cart', $cart);
+        session()->put('cart_subtotal', $cart_subtotal);
+
+        return redirect()->back();
     }
 
     /**
@@ -73,105 +87,48 @@ class TransactionController extends Controller
         //
     }
 
+    public function cartUpdate(Request $request){
+        $item = Item::findorfail($request->id);
+        $id = $request->id;
+        
+        $cart = session('cart');
+        // dd($cart);
+        $current_subtotal = $cart[$id]['subtotal'];
+        
+        $cart[$id]['qty'] = $request->qty;
+        $cart[$id]['subtotal'] = $item->price * $request->qty;
+
+        $cart_subtotal = session('cart_subtotal');
+        $current_subtotal_buffer = $item->price * $request->qty;
+
+        $cart_subtotal += $current_subtotal_buffer;
+        $cart_subtotal -= $current_subtotal;
+
+        session()->put('cart_subtotal', $cart_subtotal);
+        session()->put('cart', $cart);
+
+        return redirect()->back();
+    }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
-    }
-
-    public function addItem(Request $request, string $id){
-        // dd($id);
-        // session(['cart' => '']);
-        // session()->flush();
-        
-
-        $item = Item::find($id);
         $cart = session('cart');
-        if(is_null($cart)){
-            $cart = [];
+
+        if(isset($cart[$id])){
+            unset($cart[$id]);
+            session()->put('cart', $cart);
         }
 
-        $ids = [];
-        
-        
-        foreach($cart as $cart_item){
-            array_push($ids, $cart_item->id);
-        }
-        // dd($ids);
-        if(in_array($id, $ids)){
-            return redirect()->back();
-
-        } else {
-            $itemBuffer = (object) [
-                'id' => $item->id,
-                'name' => $item->name,
-                'category_id' => $item->category_id,
-                'stock' => $item->stock,
-                'price' => $item->price,
-            ];
-    
-            array_push($cart, $itemBuffer);
-            session(['cart' => $cart]);
-        }
-
-        
-        // dd(session('cart'));
         return redirect()->back();
-
-
-        // $objs = [];
-
-        // $obj = (object)[];
-        // $obj->tes = "tes";
-        // $obj->test = "secondary";
-
-        // array_push($objs, $obj);
-        // dd($objs[0]->test);
-
-        // $objs = [
-        //     (object) array('id' => 1, 'name' => "Bagas"),
-        //     (object) array('id' => 1, 'name' => "Bagas"),
-        //     (object) array('id' => 1, 'name' => "Bagas"),
-        // ];
-        // dd($objs);
-
-        
-
-        
-            
-        // dd(session('user'));
-    }
-
-    public function removeItem($id){
-        // dd($id);
-        $cart = session('cart');
-        $ids = [];
-
-        foreach($cart as $item){
-            array_push($ids, $item->id);
-        }
-
-        // dd($ids);
-        // dd(array_search($id, $ids));
-
-        $key_buffer = array_search($id, $ids);
-        unset($cart[$key_buffer]);
-        $cart = array_values($cart);
-
-        session(['cart' => $cart]);
-        return redirect()->back();
-
-    }
-
-    public function check(){
-        
-        dd(session('cart'));
     }
 
     public function flush(){
+        // dd(session()->get('cart'));
         session()->flush();
         return redirect()->back();
     }
+
 }

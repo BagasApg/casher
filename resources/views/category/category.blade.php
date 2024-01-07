@@ -91,7 +91,7 @@
                 <span onclick="revertEdit('${revertURL}')" class="text-primary" style="cursor: pointer">Back to create</span>
 
             `);
-            $('#form-category-submit').html('Update');
+            $('#form-category-submit').html('Edit');
             $.get("category/" + id + '/edit',
                 function(data) {
                     $('#name').val(data.name);

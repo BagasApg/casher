@@ -29,13 +29,14 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $item->name }}</td>
                                         <td>{{ $item->category->name }}</td>
-                                        <td>{{ $item->stock}}</td>
+                                        <td>{{ $item->stock }}</td>
                                         <td>@currency($item->price)</td>
                                         <td class="d-flex gap-2">
-                                            <a onclick="displayEdit({{$item->id}})" class="btn btn-primary">Edit</a>
-                                            <form action="{{route('item.destroy', $item->id)}}" method="POST">
+                                            <a onclick="displayEdit({{ $item->id }}, '{{ route('item.update', $item->id) }}')"
+                                                class="btn btn-primary">Edit</a>
+                                            <form action="{{ route('item.destroy', $item->id) }}" method="POST">
                                                 @csrf
-                                                @method("DELETE")
+                                                @method('DELETE')
                                                 <button class="btn btn-danger" type="submit">Delete</button>
                                             </form>
                                         </td>
@@ -50,7 +51,10 @@
             <div class="col-md-5">
                 <div class="card sticky-top" style="top: 2rem; z-index: 1;">
                     <div class="card-header">
-                        Add New Item
+                        <div class="card-head d-flex justify-content-between">
+
+                            Add New Item
+                        </div>
                     </div>
                     <div class="card-body">
                         <form action="{{ route('item.store') }}" method="POST">
@@ -72,7 +76,7 @@
                             <label for="stock" class="form-label">Stock</label>
                             <input type="number" name="stock" class="form-control mb-3 ep-form-control">
 
-                            <button class="btn btn-success" type="submit">Add</button>
+                            <button id="form-item-submit" class="btn btn-success" type="submit">Add</button>
                         </form>
 
 
@@ -83,10 +87,15 @@
     </div>
 
     <script>
-        function displayEdit(id){
+        function displayEdit(id, revertURL) {
             $.get("item/" + id + "/edit",
-                function (data) {
+                function(data) {
                     console.log(data)
+                    $('.card-head').html(`
+                        Edit ${data.name}
+                        <span onclick="revertEdit('${revertURL}')" class="text-primary" style="cursor: pointer">Back to create</span>
+                    `);
+                    $('#form-item-submit').html('Edit');
                     $('input[name="name"]').val(data.name);
                     $('select[name="category"]').val(data.category_id);
                     $('input[name="price"]').val(data.price);
@@ -94,6 +103,18 @@
                 }
             );
         }
+
+        function revertEdit(url) {
+            console.log('reverting!')
+            $('.card-head').html(`
+                Add New Item
+            `);
+            $('#form-item-submit').html('Add');
+            $('input[name="name"]').val('');
+            $('select[name="category"]').val('');
+            $('input[name="price"]').val('');
+            $('input[name="stock"]').val('');
+        }
     </script>
-    
+
 @endsection
